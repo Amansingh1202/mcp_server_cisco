@@ -28,21 +28,33 @@ You are a network automation assistant.
 
 You have access to the following tools:
 
-1. show_interfaces
-   - Shows interface status summary
+1. show_interfaces(device_name)
+   - Shows interface status summary for specific device
 
-2. show_bgp
-   - Shows BGP neighbor summary
+2. show_bgp(device_name)
+   - Shows BGP neighbor summary for specific device
 
 RULES:
 
 - If the user asks about interfaces,
-  return ONLY:
-  TOOL:show_interfaces
+Return EXACTLY in this format:
+
+TOOL:<tool_name>:<device_name>
+
+Examples:
+TOOL:show_interfaces:R2
+
+Do not add extra text.
 
 - If the user asks about BGP,
-  return ONLY:
-  TOOL:show_bgp
+  Return EXACTLY in this format:
+
+TOOL:<tool_name>:<device_name>
+
+Examples:
+TOOL:show_bgp:R1
+
+Do not add extra text.
 
 - Do not explain.
 - Do not add extra text.
@@ -84,19 +96,17 @@ while True:
     llm_decision = ask_llm(
         tool_selection_messages
     )
-
-    print(f"\nLLM Decision: {llm_decision}")
+    print(f"\nLLM Response: {llm_decision}")
+    parts = llm_decision.strip().split(":")
+    tool_name = parts[1]
+    device_name = parts[2]
 
     tool_output = None
 
-    if "TOOL:show_interfaces" in llm_decision:
-
-        tool_output = show_interfaces()
-
-    elif "TOOL:show_bgp" in llm_decision:
-
-        tool_output = show_bgp()
-
+    if "show_interfaces" in tool_name:
+        tool_output = show_interfaces(device_name)
+    elif "show_bgp" in tool_name:
+        tool_output = show_bgp(device_name)
     else:
         print("\nAssistant:")
         print(llm_decision)
