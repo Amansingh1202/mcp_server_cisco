@@ -3,8 +3,9 @@ from dotenv import load_dotenv
 import os
 
 from tools import (
-    show_interfaces,
-    show_bgp
+    get_interfaces,
+    show_bgp,
+    get_interfaces_all,
 )
 load_dotenv()
 
@@ -28,21 +29,34 @@ You are a network automation assistant.
 
 You have access to the following tools:
 
-1. show_interfaces(device_name)
-   - Shows interface status summary for specific device
+1. get_interfaces(device_name)
+   - Gets interface status summary for specific device
 
 2. show_bgp(device_name)
    - Shows BGP neighbor summary for specific device
 
+3. get_interfaces_all
+   - Gets interface status summary for all devices
+
 RULES:
 
-- If the user asks about interfaces,
+- If the user asks about interfaces for specific device,
 Return EXACTLY in this format:
 
 TOOL:<tool_name>:<device_name>
 
 Examples:
-TOOL:show_interfaces:R2
+TOOL:get_interfaces:R2
+
+Do not add extra text.
+
+- If the user asks about interfaces without specific device,
+Return EXACTLY in this format:
+
+TOOL:<tool_name>:None
+
+Examples:
+TOOL:get_interfaces_all:None
 
 Do not add extra text.
 
@@ -103,10 +117,12 @@ while True:
 
     tool_output = None
 
-    if "show_interfaces" in tool_name:
-        tool_output = show_interfaces(device_name)
-    elif "show_bgp" in tool_name:
+    if tool_name == "get_interfaces":
+        tool_output = get_interfaces(device_name)
+    elif tool_name == "show_bgp":
         tool_output = show_bgp(device_name)
+    elif tool_name == "get_interfaces_all":
+        tool_output = get_interfaces_all()
     else:
         print("\nAssistant:")
         print(llm_decision)

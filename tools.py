@@ -1,6 +1,7 @@
 from fastmcp import FastMCP
 from netmiko import ConnectHandler
 import json
+import sqlite3
 
 mcp = FastMCP("NetworkAutomation")
 
@@ -36,6 +37,36 @@ def show_interfaces(device_name: str):
     conn.disconnect()
     return output
 
+@mcp.tool()
+def get_interfaces(device_name: str):
+    conn = sqlite3.connect("network.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+    SELECT interface_name,
+           ip_address,
+           status,
+           protocol
+    FROM interfaces
+    WHERE device_name = ?
+    """, (device_name,))
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
+@mcp.tool()
+def get_interfaces_all():
+    conn = sqlite3.connect("network.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+    SELECT device_name,
+           interface_name,
+           ip_address,
+           status,
+           protocol
+    FROM interfaces """)
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
 
 @mcp.tool()
 def show_bgp(device_name: str):
